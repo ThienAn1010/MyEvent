@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -15,28 +14,39 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { eventFormSchema } from "@/lib/validator";
+import * as z from "zod";
 import { eventDefaultValues } from "@/constants";
-import DropDown from "./DropDown";
+import Dropdown from "./DropDown";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploader } from "./FileUploader";
 import { useState } from "react";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useUploadThing } from "@/lib/uploadthing";
 
 import "react-datepicker/dist/react-datepicker.css";
+import { Checkbox } from "../ui/checkbox";
 import { useRouter } from "next/navigation";
-import { createEvent } from "@/lib/actions/event.actions";
+import { createEvent, updateEvent } from "@/lib/actions/event.actions";
+import { IEvent } from "@/lib/database/models/event.model";
 
 type EventFormProps = {
     userId: string;
     type: "Create" | "Update";
+    event?: IEvent;
+    eventId?: string;
 };
 
-const EventForm = ({ userId, type }: EventFormProps) => {
+const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
     const [files, setFiles] = useState<File[]>([]);
-    const initialValues = eventDefaultValues;
+    const initialValues =
+        event && type === "Update"
+            ? {
+                  ...event,
+                  startDateTime: new Date(event.startDateTime),
+                  endDateTime: new Date(event.endDateTime),
+              }
+            : eventDefaultValues;
     const router = useRouter();
 
     const { startUpload } = useUploadThing("imageUploader");
@@ -48,6 +58,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
 
     async function onSubmit(values: z.infer<typeof eventFormSchema>) {
         let uploadedImageUrl = values.imageUrl;
+
         if (files.length > 0) {
             const uploadedImages = await startUpload(files);
 
@@ -65,9 +76,36 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                     userId,
                     path: "/profile",
                 });
+
                 if (newEvent) {
                     form.reset();
                     router.push(`/events/${newEvent._id}`);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        if (type === "Update") {
+            if (!eventId) {
+                router.back();
+                return;
+            }
+
+            try {
+                const updatedEvent = await updateEvent({
+                    userId,
+                    event: {
+                        ...values,
+                        imageUrl: uploadedImageUrl,
+                        _id: eventId,
+                    },
+                    path: `/events/${eventId}`,
+                });
+
+                if (updatedEvent) {
+                    form.reset();
+                    router.push(`/events/${updatedEvent._id}`);
                 }
             } catch (error) {
                 console.log(error);
@@ -98,14 +136,13 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
                         name="categoryId"
                         render={({ field }) => (
                             <FormItem className="w-full">
                                 <FormControl>
-                                    <DropDown
+                                    <Dropdown
                                         onChangeHandler={field.onChange}
                                         value={field.value}
                                     />
@@ -165,6 +202,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             width={24}
                                             height={24}
                                         />
+
                                         <Input
                                             placeholder="Event location or Online"
                                             {...field}
@@ -193,7 +231,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             height={24}
                                             className="filter-grey"
                                         />
-                                        <p className="ml-3 whitespace-nowrap text-grey=600">
+                                        <p className="ml-3 whitespace-nowrap text-grey-600">
                                             Start Date:
                                         </p>
                                         <DatePicker
@@ -203,7 +241,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             }
                                             showTimeSelect
                                             timeInputLabel="Time:"
-                                            dateFormat="dd/MM/yyyy h:mm aa"
+                                            dateFormat="MM/dd/yyyy h:mm aa"
                                             wrapperClassName="datePicker"
                                         />
                                     </div>
@@ -227,7 +265,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             height={24}
                                             className="filter-grey"
                                         />
-                                        <p className="ml-3 whitespace-nowrap text-grey=600">
+                                        <p className="ml-3 whitespace-nowrap text-grey-600">
                                             End Date:
                                         </p>
                                         <DatePicker
@@ -237,7 +275,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             }
                                             showTimeSelect
                                             timeInputLabel="Time:"
-                                            dateFormat="dd/MM/yyyy h:mm aa"
+                                            dateFormat="MM/dd/yyyy h:mm aa"
                                             wrapperClassName="datePicker"
                                         />
                                     </div>
@@ -263,7 +301,6 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             height={24}
                                             className="filter-grey"
                                         />
-
                                         <Input
                                             type="number"
                                             placeholder="Price"
@@ -318,8 +355,9 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                                             width={24}
                                             height={24}
                                         />
+
                                         <Input
-                                            placeholder="Url"
+                                            placeholder="URL"
                                             {...field}
                                             className="input-field"
                                         />
@@ -339,7 +377,7 @@ const EventForm = ({ userId, type }: EventFormProps) => {
                 >
                     {form.formState.isSubmitting
                         ? "Submitting..."
-                        : `${type} Event`}
+                        : `${type} Event `}
                 </Button>
             </form>
         </Form>
