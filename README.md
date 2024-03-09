@@ -16,7 +16,7 @@ MEvent is a website that serves as an event management platform. It provides use
 
 ## Features
 
-- Discover upcoming events in Vietnam.
+- Discover upcoming events.
 - Explore event details including date, time, location, and description.
 - Participate in events by registering or purchasing tickets directly through the website.
 
