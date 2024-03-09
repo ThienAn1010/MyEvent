@@ -4,7 +4,7 @@
 
 ## Description
 
-MEventVN is a website that serves as an event management platform. It provides users with the ability to discover, explore, and participate in various events.
+MEvent is a website that serves as an event management platform. It provides users with the ability to discover, explore, and participate in various events.
 
 ## Table of Contents
 
