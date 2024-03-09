@@ -1,4 +1,4 @@
-# MEventVN Website
+# MEvent Website
 
 [![Website Status](https://img.shields.io/website-up-down-green-red/https/meventvn.vercel.app.svg)](https://meventvn.vercel.app/)
 
