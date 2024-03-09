@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
                             Host, Connect, Celebrate: Your Events, Our Platform!
                         </h1>
                         <p className="p-regular-20 md:p-regular-24">
-                            Book and learn helpful tips from 3,168+ mentors in
+                            Book and learn helpful tips from 999+ mentors in
                             world-class companies with our global community.
                         </p>
                         <Button
