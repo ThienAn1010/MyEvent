@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: "Mevent",
     description: "Take your event management to the next level",
     icons: {
-        icon: "/assets/images/logo2.svg",
+        icon: "/assets/images/logo.svg",
     },
 };
 
